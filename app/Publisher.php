@@ -15,7 +15,7 @@ class Publisher extends Model
         'image_url'
     ];
 
-    public function book()
+    public function books()
     {
         return $this->hasMany('App\Book', 'publisher_id', 'publisher_id');
     }

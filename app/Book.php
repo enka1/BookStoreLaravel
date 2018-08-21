@@ -11,10 +11,10 @@ class Book extends Model
     protected $primaryKey = 'book_id';
     public $timestamps = false;
     protected $fillable = [
+        'book_id',
         'book_name',
-        'author_id',
-        'publisher_id',
         'price',
+        'author_id',
         'image_url',
         'on_shelf_time',
         'quantity',
@@ -23,17 +23,17 @@ class Book extends Model
 
     public function author()
     {
-        return $this->hasOne('App\Author', 'author_id', 'author_id');
+        return $this->belongsTo('App\Author', 'author_id', 'author_id');
     }
 
     public function publisher()
     {
-        return $this->hasOne('App\Publisher', 'publisher_id', 'publisher_id');
+        return $this->belongsTo('App\Publisher', 'publisher_id', 'publisher_id');
     }
 
-    public function category()
+    public function categories()
     {
-        return $this->belongsToMany('App\Category', 'book_category', 'book_id', 'category_id');
+        return $this->hasOne('App\Categories', 'book_id', 'book_id');
     }
 
     public function description()
