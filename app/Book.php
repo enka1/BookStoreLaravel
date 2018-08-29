@@ -13,8 +13,10 @@ class Book extends Model
     protected $fillable = [
         'book_id',
         'book_name',
-        'price',
+        'import_price',
+        'sale_price',
         'author_id',
+        'description',
         'image_url',
         'on_shelf_time',
         'quantity',
@@ -36,15 +38,64 @@ class Book extends Model
         return $this->hasOne('App\Categories', 'book_id', 'book_id');
     }
 
-    public function description()
-    {
-        return $this->hasMany('App\Description', 'book_id', 'book_id');
-    }
-
     public function slider()
     {
         return $this->hasOne('App\BookSlider', 'book_id', 'book_id');
     }
 
+    public function find_by_book_name($book_name)
+    {
+        return $this::where('book_name', 'ilike', '%' . $book_name . '%')->get();
+    }
 
+    public function book_detail($book_id)
+    {
+        $book_detail = $this::find($book_id);
+        $book_detail->author;
+        $book_detail->publisher;
+        $book_detail->categories;
+        return $book_detail;
+    }
+
+    public function get_storage_state()
+    {
+        $books = $this::orderBy('book_name')->paginate(10);
+        foreach ($books as $book) {
+            $book->author;
+            $book->publisher;
+        }
+        return $books;
+    }
+
+    public function get_book_sliders()
+    {
+        return $this::has('slider')->with('slider')->orderBy(DB::raw('random()'))->limit(3)->get();
+    }
+
+    public function book_collection_by_genres($genres, $isAsc, $sortBy)
+    {
+        if ($genres != null && sizeof($genres) > 0) {
+            $books = Book::whereHas('categories', function ($book) use ($genres) {
+                $genresDB = "ARRAY[";
+                foreach ($genres as $genre) {
+                    $genresDB = $genresDB . "'" . $genre . "',";
+                }
+                $genresDB = substr($genresDB, 0, -1) . ']::uuid[]';
+                $book->where('categories', '@>', \DB::raw($genresDB));
+            });
+        } else {
+            $books = Book::with('categories');
+        }
+        if ($isAsc == true) {
+            $books->orderBy($sortBy)->get();
+        } else {
+            $books->orderByDesc($sortBy)->get();
+        }
+        $books = $books->paginate(12);
+        foreach ($books->items() as $book) {
+            $book->author;
+            $book->publisher;
+        }
+        return $books;
+    }
 }
