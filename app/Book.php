@@ -11,11 +11,9 @@ class Book extends Model
     protected $primaryKey = 'book_id';
     public $timestamps = false;
     protected $fillable = [
-        'book_id',
         'book_name',
         'import_price',
         'sale_price',
-        'author_id',
         'description',
         'image_url',
         'on_shelf_time',
@@ -69,7 +67,7 @@ class Book extends Model
 
     public function get_book_sliders()
     {
-        return $this::has('slider')->with('slider')->orderBy(DB::raw('random()'))->limit(3)->get();
+        return $this::has('slider')->with('slider')->orderBy(\DB::raw('random()'))->get();
     }
 
     public function book_collection_by_genres($genres, $isAsc, $sortBy)
@@ -91,7 +89,7 @@ class Book extends Model
         } else {
             $books->orderByDesc($sortBy)->get();
         }
-        $books = $books->paginate(12);
+        $books = $books->paginate(16);
         foreach ($books->items() as $book) {
             $book->author;
             $book->publisher;
